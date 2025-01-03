@@ -5,7 +5,7 @@ import cors from "cors";
 import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env.js";
 import connectDB from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
-import { OK } from "./constants/http.js";
+import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 
@@ -19,9 +19,7 @@ app.use(
   })
 );
 
-app.get("/", async (_, res) => {
-  return res.status(OK).json({ status: "healthy" });
-});
+app.use("/auth", authRoutes);
 
 app.use(errorHandler);
 
