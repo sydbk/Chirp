@@ -1,6 +1,6 @@
 import { z } from "zod";
 import catchErrors from "../utils/catchErrors.js";
-import { CONFLICT, CREATED } from "../constants/http.js";
+import { CONFLICT, CREATED, OK, UNAUTHORIZED } from "../constants/http.js";
 import UserModel from "../models/user.model.js";
 import SessionModel from "../models/session.model.js";
 import jwt from "jsonwebtoken";
@@ -71,5 +71,58 @@ export const signupHandler = catchErrors(async (req, res) => {
 
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(CREATED)
+    .json(user.omitPassword());
+});
+
+const loginSchema = z.object({
+  username: z.string().max(255),
+  password: z.string().max(255),
+  userAgent: z.string().optional(),
+});
+
+export const loginHandler = catchErrors(async (req, res) => {
+  const request = loginSchema.parse({
+    ...req.body,
+    userAgent: req.headers["user-agent"],
+  });
+
+  const user = await UserModel.findOne({
+    username: request.username,
+  });
+  appAssert(user, UNAUTHORIZED, "Invalid username or password");
+
+  const isValid = await user.comparePassword(request.password);
+  appAssert(isValid, UNAUTHORIZED, "Invalid username or password");
+
+  const session = await SessionModel.create({
+    userId: user._id,
+    userAgent: request.userAgent,
+  });
+
+  const refreshToken = jwt.sign(
+    {
+      sessionId: session._id,
+    },
+    JWT_REFRESH_SECRET,
+    {
+      audience: ["user"],
+      expiresIn: "30d",
+    }
+  );
+
+  const accessToken = jwt.sign(
+    {
+      sessionId: session._id,
+      userId: user._id,
+    },
+    JWT_SECRET,
+    {
+      audience: ["user"],
+      expiresIn: "15m",
+    }
+  );
+
+  return setAuthCookies({ res, accessToken, refreshToken })
+    .status(OK)
     .json(user.omitPassword());
 });
