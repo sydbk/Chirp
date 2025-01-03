@@ -3,10 +3,13 @@ import catchErrors from "../utils/catchErrors.js";
 import { CONFLICT, CREATED, OK, UNAUTHORIZED } from "../constants/http.js";
 import UserModel from "../models/user.model.js";
 import SessionModel from "../models/session.model.js";
-import jwt from "jsonwebtoken";
 import appAssert from "../utils/appAssert.js";
-import { JWT_REFRESH_SECRET, JWT_SECRET } from "../constants/env.js";
 import { setAuthCookies } from "../utils/cookies.js";
+import {
+  accessTokenOptions,
+  refreshTokenOptions,
+  signToken,
+} from "../utils/jwt.js";
 
 const signupSchema = z.object({
   name: z
@@ -46,27 +49,14 @@ export const signupHandler = catchErrors(async (req, res) => {
     userAgent: request.userAgent,
   });
 
-  const refreshToken = jwt.sign(
-    {
-      sessionId: session._id,
-    },
-    JWT_REFRESH_SECRET,
-    {
-      audience: ["user"],
-      expiresIn: "30d",
-    }
+  const accessToken = signToken(
+    { sessionId: session._id, userId: user._id },
+    accessTokenOptions
   );
 
-  const accessToken = jwt.sign(
-    {
-      sessionId: session._id,
-      userId: user._id,
-    },
-    JWT_SECRET,
-    {
-      audience: ["user"],
-      expiresIn: "15m",
-    }
+  const refreshToken = signToken(
+    { sessionId: session._id },
+    refreshTokenOptions
   );
 
   return setAuthCookies({ res, accessToken, refreshToken })
@@ -99,27 +89,14 @@ export const loginHandler = catchErrors(async (req, res) => {
     userAgent: request.userAgent,
   });
 
-  const refreshToken = jwt.sign(
-    {
-      sessionId: session._id,
-    },
-    JWT_REFRESH_SECRET,
-    {
-      audience: ["user"],
-      expiresIn: "30d",
-    }
+  const accessToken = signToken(
+    { sessionId: session._id, userId: user._id },
+    accessTokenOptions
   );
 
-  const accessToken = jwt.sign(
-    {
-      sessionId: session._id,
-      userId: user._id,
-    },
-    JWT_SECRET,
-    {
-      audience: ["user"],
-      expiresIn: "15m",
-    }
+  const refreshToken = signToken(
+    { sessionId: session._id },
+    refreshTokenOptions
   );
 
   return setAuthCookies({ res, accessToken, refreshToken })
