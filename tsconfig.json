@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./api/dist",
+    "rootDir": "./api",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "ts-node": { "esm": true },
+  "include": ["api/src/**/*"],
+  "exclude": ["node_modules", "client"]
+}
