@@ -3,8 +3,8 @@ import express from "express";
 import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { OK } from "./constants/http.js";
 import errorHandler from "./middleware/errorHandler.js";
+import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 
@@ -18,11 +18,7 @@ app.use(
   })
 );
 
-app.get("/", (_, res) => {
-  res.status(OK).json({
-    status: "healthy",
-  });
-});
+app.use("/auth", authRoutes);
 
 app.use(errorHandler);
 
