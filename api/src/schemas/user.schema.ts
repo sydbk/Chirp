@@ -21,6 +21,7 @@ export const usernameSchema = z
   .string()
   .min(3)
   .max(15)
+  .trim()
   .regex(/^[a-zA-Z0-9_]+$/)
   .refine((username) => !restrictedUsernames.includes(username.toLowerCase()), {
     message: "This username is unavailable",

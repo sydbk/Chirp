@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions, VerifyOptions } from "jsonwebtoken";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../constants/env.js";
 
 export type RefreshTokenPayload = {
@@ -11,6 +11,10 @@ export type AccessTokenPayload = {
 };
 
 type SignOptionsAndSecret = SignOptions & {
+  secret: string;
+};
+
+type VerifyOptionsAndSecret = VerifyOptions & {
   secret: string;
 };
 
@@ -34,4 +38,20 @@ export const signToken = (
 ) => {
   const { secret, ...signOpts } = options;
   return jwt.sign(payload, secret, { ...defaults, ...signOpts });
+};
+
+export const verifyToken = <TPayload extends object>(
+  token: string,
+  options?: VerifyOptionsAndSecret
+) => {
+  const { secret = JWT_SECRET, ...verifyOpts } = options || {};
+  try {
+    const payload = jwt.verify(token, secret, {
+      ...defaults,
+      ...verifyOpts,
+    }) as TPayload;
+    return { payload };
+  } catch (error) {
+    return { error: (error as Error).message };
+  }
 };

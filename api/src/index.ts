@@ -5,6 +5,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import errorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.route.js";
+import profileRoutes from "./routes/profile.route.js";
+import authenticate from "./middleware/authenticate.js";
 
 const app = express();
 
@@ -19,6 +21,7 @@ app.use(
 );
 
 app.use("/auth", authRoutes);
+app.use("/profile", authenticate, profileRoutes);
 
 app.use(errorHandler);
 
