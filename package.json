@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm api/src/index.ts"
+    "api": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm api/src/index.ts",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run api\" \"npm run client\""
   },
   "keywords": [],
   "author": "",
@@ -26,6 +28,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
     "prisma": "^6.1.0",
     "ts-node": "^10.9.2",
