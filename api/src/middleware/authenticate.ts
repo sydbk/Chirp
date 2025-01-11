@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import appAssert from "../utils/app.assert.js";
 import { UNAUTHORIZED } from "../constants/http.js";
 import { AccessTokenPayload, verifyToken } from "../utils/jwt.js";
+import ErrorCode from "../constants/errorCode.js";
 
 declare global {
   namespace Express {
@@ -14,13 +15,19 @@ declare global {
 
 const authenticate: RequestHandler = (req, _, next) => {
   const accessToken = req.cookies.accessToken;
-  appAssert(accessToken, UNAUTHORIZED, "Not authorized");
+  appAssert(
+    accessToken,
+    UNAUTHORIZED,
+    "Not authorized",
+    ErrorCode.InvalidAccessToken
+  );
 
   const { payload, error } = verifyToken<AccessTokenPayload>(accessToken);
   appAssert(
     payload,
     UNAUTHORIZED,
-    error === "jwt expired" ? "Token expired" : "Invalid token"
+    error === "jwt expired" ? "Token expired" : "Invalid token",
+    ErrorCode.InvalidAccessToken
   );
 
   req.userId = payload.userId;
